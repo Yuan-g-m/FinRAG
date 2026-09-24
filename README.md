@@ -62,6 +62,48 @@ uvicorn app:app --host 0.0.0.0 --port 8080
 
 访问 `http://127.0.0.1:8080/`。
 
+## 环境变量
+
+所有配置优先从 `.env` 读取，未设置时回退到 `config.ini`。`config.ini` 中的密码仅为 `change_me` 占位，实际部署必须通过 `.env` 注入真实值。
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `MYSQL_HOST` / `MYSQL_PORT` | `localhost` / `3306` | MySQL 地址与端口 |
+| `MYSQL_USER` / `MYSQL_PASSWORD` | `root` / 空 | MySQL 账号密码 |
+| `MYSQL_DATABASE` | `finance_kg` | FAQ 数据库名 |
+| `MYSQL_ROOT_PASSWORD` | `change_me` | 供 `docker-compose.yml` 初始化 MySQL root 密码 |
+| `REDIS_HOST` / `REDIS_PORT` | `localhost` / `6379` | Redis 地址与端口 |
+| `REDIS_PASSWORD` / `REDIS_DB` | 空 / `0` | Redis 密码与库编号 |
+| `MILVUS_HOST` / `MILVUS_PORT` | `localhost` / `19530` | Milvus 地址与端口 |
+| `MILVUS_DATABASE_NAME` | `finance_rag` | Milvus 数据库名 |
+| `MILVUS_COLLECTION_NAME` | `finrag_final` | Milvus 集合名 |
+| `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` | `change_me` | 供 `docker-compose.yml` 初始化 MinIO |
+| `LLM_MODEL` | `deepseek-chat` | LLM 模型名 |
+| `LLM_API_KEY` | 空 | 必需，LLM API 密钥 |
+| `LLM_BASE_URL` | `https://api.deepseek.com` | OpenAI 兼容接口地址 |
+| `FINRAG_MODEL_ROOT` | `rag_qa/models` | 模型存放根目录（可指向外部目录） |
+| `HOST` / `PORT` | `0.0.0.0` / `8080` | Web 服务监听地址与端口 |
+
+## 端口映射
+
+| 服务 | 端口 |
+| --- | --- |
+| Web 前端 / API | `8080` |
+| MySQL | `3308`（容器内 `3306`） |
+| Redis | `6379` |
+| Milvus | `19530` |
+| Attu 控制台 | `30000` |
+
+## 数据格式
+
+- FAQ 数据：`mysql_qa/data/金融知识问答.csv`，三列 `领域,问题,答案`，领域取值为 `股票/基金/债券/银行/保险`。
+- 知识库文档：`rag_qa/data/<领域>_data/*.md`，每个领域一个子目录，可放置基础/进阶等 Markdown 文档。
+- 导入命令：
+
+```bash
+python -m rag_qa.main --data-processing --data-dir rag_qa/data
+```
+
 ## 模型下载
 
 运行时需要以下模型，统一放在 `rag_qa/models/` 目录下（可用环境变量 `FINRAG_MODEL_ROOT` 指向其他目录）：
@@ -129,7 +171,20 @@ uvicorn app:app --host 0.0.0.0 --port 8080
 python scripts/smoke_test.py
 ```
 
+## 常见问题
+
+- **模型下载失败/较慢**：`bge-m3`、`bge-reranker-large` 等体积较大，建议设置 HuggingFace 镜像后重试 `python scripts/download_models.py`；文档切分模型（约 388MB）走 ModelScope。
+- **提示缺少分类器**：`bert_query_classifier_finance` 为自定义训练权重，未下载；系统会自动退化为 `bert-base-chinese` 初始化模型并以金融关键词兜底，不影响基本问答，详见「模型下载」。
+- **连不上 Milvus/MySQL/Redis**：先确认 `docker compose up -d` 已成功，再检查 `.env` 的端口与密码是否和容器一致。
+- **Windows 中文路径问题**：可用 `FINRAG_MODEL_ROOT` 指向无中文路径的模型目录，避免从 `D:\xxx\项目` 这类路径加载模型。
+
+## 生产部署注意事项
+
+- 修改 `.env` 中所有 `change_me` 占位密码，`docker-compose.yml` 中的默认值仅用于本地开发。
+- `app.py` 中 CORS 当前为 `allow_origins=["*"]`，公网部署应改为具体前端域名。
+- 前端默认通过 `ws://127.0.0.1:8080/api/stream` 通信，若走 HTTPS/WSS 需相应调整前端连接地址。
+- `.env`、`rag_qa/models/`、`legacy_backup/` 均被 `.gitignore` 排除，请勿提交到仓库。
+
 ## 许可证
 
-尚未选择开源许可证。上传 GitHub 前建议明确许可证（如 MIT / Apache-2.0），并确认依赖（PyTorch、Transformers 等）与模型权重各自的许可条款允许再分发。
-
+本项目采用 MIT License，详见 `LICENSE`。请另行确认依赖（PyTorch、Transformers 等）与模型权重各自的许可条款允许再分发。
