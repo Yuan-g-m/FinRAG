@@ -38,13 +38,13 @@ class Config:
         # # 3.1 解析MySQL数据库配置.
         # self.MYSQL_HOST = self.config.get('mysql', 'host', fallback='localhost')
         # self.MYSQL_USER = self.config.get('mysql', 'user', fallback='root')
-        # self.MYSQL_PASSWORD = self.config.get('mysql', 'password', fallback='123456')
+        # self.MYSQL_PASSWORD = self.config.get('mysql', 'password', fallback='')
         # self.MYSQL_DATABASE = self.config.get('mysql', 'database', fallback='finance_kg')
         #
         # # 3.2 解析Redis数据库配置.
         # self.REDIS_HOST = self.config.get('redis', 'host', fallback='localhost')
         # self.REDIS_PORT = self.config.get('redis', 'port', fallback=6379)
-        # self.REDIS_PASSWORD = self.config.get('redis', 'password', fallback='1234')
+        # self.REDIS_PASSWORD = self.config.get('redis', 'password', fallback='')
         # self.REDIS_DB = self.config.get('redis', 'db', fallback=0)
         #
         # # 3.3 解析日志配置.
@@ -76,7 +76,7 @@ class Config:
         # MySQL 用户名
         self.MYSQL_USER = os.getenv('MYSQL_USER', self.config.get('mysql', 'user', fallback='root'))
         # MySQL 密码
-        self.MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', self.config.get('mysql', 'password', fallback='123456'))
+        self.MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', self.config.get('mysql', 'password', fallback=''))
         # MySQL 数据库名
         self.MYSQL_DATABASE = os.getenv('MYSQL_DATABASE',
                                         self.config.get('mysql', 'database', fallback='finance_kg'))
@@ -89,7 +89,7 @@ class Config:
         # Redis 端口
         self.REDIS_PORT = int(os.getenv('REDIS_PORT', self.config.get('redis', 'port', fallback=6379)))
         # Redis 密码
-        self.REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', self.config.get('redis', 'password', fallback='1234'))
+        self.REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', self.config.get('redis', 'password', fallback=''))
         # Redis 数据库编号
         self.REDIS_DB = int(os.getenv('REDIS_DB', self.config.get('redis', 'db', fallback=0)))
 
