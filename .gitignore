@@ -1,0 +1,32 @@
+# ---- 环境与密钥 ----
+.env
+.env.local
+.env.*.local
+
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ---- 模型与大型二进制(体积大, 下载方式见 README) ----
+rag_qa/models/
+
+# ---- 日志与运行时 ----
+logs/
+*.log
+
+# ---- 旧版教育项目归档(不参与运行) ----
+legacy_backup/
+
+# ---- IDE / 系统 ----
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
